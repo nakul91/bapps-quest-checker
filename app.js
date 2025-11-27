@@ -85,8 +85,9 @@ async function checkNFTOwnership(walletAddress) {
 
         const data = await response.json();
 
-        // Find Bapp Quest NFT
+        // Find Bapps Quest NFT
         const bappNFT = data.items?.find(item => 
+            item.token?.name?.toLowerCase().includes('bapps quest') ||
             item.token?.name?.toLowerCase().includes('bapp quest') ||
             item.token?.address_hash?.toLowerCase() === NFT_CONTRACT.toLowerCase()
         );
