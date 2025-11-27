@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bapp Quest NFT Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <style>
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .gradient-bg {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .pulse-ring {
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.95);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(0.95);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="glass rounded-3xl shadow-2xl max-w-2xl w-full p-8 md:p-12">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+                <img 
+                    src="https://bapps.citrea.xyz/images/logo.svg" 
+                    alt="Citrea Logo" 
+                    class="h-16 md:h-20 w-auto"
+                />
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-3">
+                🎨 Bapp Quest NFT Checker
+            </h1>
+            <p class="text-white/80 text-lg">
+                Check if you won the exclusive Bapp Quest NFT on Citrea Testnet
+            </p>
+        </div>
+
+        <!-- Input Form -->
+        <div id="inputSection" class="space-y-6">
+            <div>
+                <label for="walletAddress" class="block text-white font-semibold mb-2 text-sm uppercase tracking-wide">
+                    Enter Your Wallet Address
+                </label>
+                <input 
+                    type="text" 
+                    id="walletAddress" 
+                    placeholder="0x..." 
+                    class="w-full px-4 py-4 rounded-xl bg-white/20 text-white placeholder-white/50 border-2 border-white/30 focus:border-white/60 focus:outline-none transition-all text-lg"
+                />
+            </div>
+
+            <button 
+                id="checkButton" 
+                class="w-full bg-white text-purple-600 font-bold py-4 px-6 rounded-xl hover:bg-purple-50 transition-all transform hover:scale-105 active:scale-95 shadow-lg text-lg pulse-ring"
+            >
+                Check NFT Ownership 🔍
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingSection" class="hidden text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
+            <p class="text-white text-xl mt-4 font-semibold">Checking blockchain...</p>
+        </div>
+
+        <!-- Success Result -->
+        <div id="successSection" class="hidden">
+            <div class="text-center py-8">
+                <div class="text-8xl mb-4">🎉</div>
+                <h2 class="text-4xl font-bold text-white mb-4">
+                    Congratulations!
+                </h2>
+                <p class="text-white/90 text-xl mb-6">
+                    You own the Bapp Quest NFT!
+                </p>
+
+                <!-- NFT Details Card -->
+                <div class="glass rounded-2xl p-6 mb-6 text-left">
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-white/70 font-semibold min-w-[120px]">Token ID:</span>
+                            <span class="text-white font-mono" id="tokenId">-</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-white/70 font-semibold min-w-[120px]">Contract:</span>
+                            <span class="text-white font-mono text-sm break-all" id="contract">-</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-white/70 font-semibold min-w-[120px]">Minted On:</span>
+                            <span class="text-white" id="mintDate">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Link -->
+                <a 
+                    id="txLink" 
+                    href="#" 
+                    target="_blank"
+                    class="inline-block bg-white text-purple-600 font-bold py-4 px-8 rounded-xl hover:bg-purple-50 transition-all transform hover:scale-105 shadow-lg mb-4"
+                >
+                    View Transaction on Explorer 🔗
+                </a>
+
+                <button 
+                    id="checkAnotherButton" 
+                    class="block w-full mt-4 bg-white/20 text-white font-semibold py-3 px-6 rounded-xl hover:bg-white/30 transition-all"
+                >
+                    Check Another Address
+                </button>
+            </div>
+        </div>
+
+        <!-- Failure Result -->
+        <div id="failureSection" class="hidden">
+            <div class="text-center py-8">
+                <div class="text-8xl mb-4">😢</div>
+                <h2 class="text-4xl font-bold text-white mb-4">
+                    Sorry, Bad Luck!
+                </h2>
+                <p class="text-white/90 text-xl mb-6">
+                    This address doesn't own the Bapp Quest NFT.
+                </p>
+                <p class="text-white/70 mb-8">
+                    The NFT was distributed to participants of the "unfreeze Bapps for Citrea Mainnet" campaign on Testnet.
+                </p>
+
+                <button 
+                    id="tryAnotherButton" 
+                    class="bg-white text-purple-600 font-bold py-4 px-8 rounded-xl hover:bg-purple-50 transition-all transform hover:scale-105 shadow-lg"
+                >
+                    Try Another Address
+                </button>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorSection" class="hidden">
+            <div class="text-center py-8">
+                <div class="text-6xl mb-4">⚠️</div>
+                <h2 class="text-3xl font-bold text-white mb-4">
+                    Oops! Something went wrong
+                </h2>
+                <p class="text-white/80 mb-6" id="errorMessage">
+                    Please check your wallet address and try again.
+                </p>
+
+                <button 
+                    id="retryButton" 
+                    class="bg-white text-purple-600 font-bold py-4 px-8 rounded-xl hover:bg-purple-50 transition-all transform hover:scale-105 shadow-lg"
+                >
+                    Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
